@@ -1,0 +1,45 @@
+{
+  "name": "dsh-svn-tools",
+  "description": "SVN (Subversion) tools + sidebar UI for DeepSeek Harness: status/info/diff/log/add/revert/update/commit with UTF-8 Chinese commit log support, and an SVN panel registered into dsh-better-sidebar.",
+  "version": "0.2.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "svn",
+    "subversion",
+    "version-control",
+    "sidebar"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-modules"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ]
+}

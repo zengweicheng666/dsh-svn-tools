@@ -1,0 +1,4 @@
+# dsh bundle patch: inserts the SVN tools plugin into a profile's layer stack.
+- insert:
+    - id: svn-tools
+      name: 'dsh-svn-tools'
