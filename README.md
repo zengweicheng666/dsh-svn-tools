@@ -1,5 +1,15 @@
 # dsh-svn-tools
 
+> ⚠️ **前置条件（必读）**：本插件的侧边栏 UI 依赖 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)。**请先安装并启用它**：
+>
+> ```sh
+> dsh plugin --profile web add dsh-better-sidebar
+> ```
+>
+> 并确认 profile `package.json` 的 `dsh.profile.bundles` 包含 `dsh-better-sidebar`（列在 `dsh-svn-tools` **之前**）。
+> 未安装时：本插件的 preinstall 检查会**中止安装**（需放行构建脚本，见「安装」）；即使绕过检查强行安装，侧边栏「SVN」分页也不会注册（浏览器控制台会输出同样的指引，不会崩溃）。
+> **33 个 `svn_*` agent 工具不依赖它**，可独立使用。
+
 SVN (Subversion) 工具 + 侧边栏 UI 插件，为 DeepSeek Harness 提供：
 
 ## Agent 工具（33 个）
@@ -44,14 +54,36 @@ SVN (Subversion) 工具 + 侧边栏 UI 插件，为 DeepSeek Harness 提供：
 
 ## 安装
 
-```sh
-dsh plugin --profile web add file:./plugins/dsh-svn-tools
-```
+1. 先安装前置插件（如未安装）：
 
-并确保 `package.json` 的 `dsh.profile.bundles` 中包含 `dsh-svn-tools`。重启 dsh web 后生效。
+   ```sh
+   dsh plugin --profile web add dsh-better-sidebar
+   ```
+
+2. 再安装本插件：
+
+   ```sh
+   dsh plugin --profile web add file:./plugins/dsh-svn-tools
+   ```
+
+   并确保 `package.json` 的 `dsh.profile.bundles` 中包含 `dsh-svn-tools`。重启 dsh web 后生效。
+
+### 启用安装时前置检查（preinstall 门禁）
+
+pnpm 10 默认阻止依赖包的生命周期脚本。要让「未安装 dsh-better-sidebar 时中止安装」的 preinstall 检查真正生效，需在 profile 目录放行一次构建脚本（任选其一）：
+
+- 交互式：在 profile 目录执行 `pnpm approve-builds`，批准 `dsh-svn-tools`；
+- 或直接在 profile 的 `pnpm-workspace.yaml` 中加：
+
+  ```yaml
+  onlyBuiltDependencies:
+    - dsh-svn-tools
+  ```
+
+未放行时安装仍会成功，但 pnpm 会打印 `Issues with peer dependencies found`（peerDependencies 声明）警告，且侧边栏分页不会注册（运行时守卫兜底，不崩溃）。有意跳过检查可设置环境变量 `DSH_SVN_TOOLS_SKIP_SIDEBAR_CHECK=1`。
 
 ## 前提
 
 - `svn` 命令行客户端在 PATH 中（Windows 上为 `svn.exe`）。
-- dsh-better-sidebar 已安装（侧边栏 UI 依赖）。
+- **dsh-better-sidebar 已安装并启用**（侧边栏 UI 硬依赖；安装时 preinstall 会检查 `dsh.profile.bundles`）。
 - 输出解码：优先 UTF-8，失败回退 GBK（中文 Windows 控制台）。
