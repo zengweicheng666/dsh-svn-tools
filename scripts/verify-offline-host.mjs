@@ -41,6 +41,10 @@ apply({
   agents: {},
   llm: {},
   effect(fn) { return fn(); },
+  // No settings service in this fake context on purpose: the plugin must work
+  // exactly as before with the documented defaults (see verify-settings-host
+  // for the namespace registration itself).
+  inject() { return { dispose() {} }; },
 });
 if (!handler) { console.error('the /svn/api handler was not registered'); process.exit(2); }
 

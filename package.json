@@ -1,14 +1,16 @@
 {
   "name": "dsh-svn-tools",
-  "description": "SVN (Subversion) tools + sidebar UI for DeepSeek Harness: full command coverage (status/info/diff/log/blame/list/cat/add/delete/mkdir/copy/move/merge/switch/checkout/cleanup/resolve/props/commit...) with UTF-8 Chinese commit logs, plus an SVN panel in dsh-better-sidebar.",
-  "version": "0.12.0",
+  "description": "SVN (Subversion) tools + sidebar UI for DeepSeek Harness: full command coverage (status/info/diff/log/blame/list/cat/add/delete/mkdir/copy/move/merge/switch/checkout/cleanup/resolve/props/commit...) with UTF-8 Chinese commit logs, plus an SVN panel that registers into DSH's own right Sidebar (0.1.5+) or dsh-better-sidebar, both driven by one settings namespace.",
+  "version": "0.13.0",
   "type": "module",
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
     "preinstall": "node scripts/preinstall.cjs",
     "verify:offline": "node scripts/verify-offline-modes.mjs",
-    "verify:offline:host": "node scripts/verify-offline-host.mjs"
+    "verify:offline:host": "node scripts/verify-offline-host.mjs",
+    "verify:settings": "node scripts/verify-settings.mjs",
+    "verify:settings:host": "node scripts/verify-settings-host.mjs"
   },
   "keywords": [
     "deepseek",
@@ -18,7 +20,8 @@
     "svn",
     "subversion",
     "version-control",
-    "sidebar"
+    "sidebar",
+    "settings"
   ],
   "dsh": {
     "bundle": {
@@ -35,7 +38,16 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "^3.18.2",
     "dsh-better-sidebar": ">=0.18.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    },
+    "dsh-better-sidebar": {
+      "optional": true
+    }
   },
   "exports": {
     ".": "./lib/index.js",
@@ -48,6 +60,8 @@
     "scripts/preinstall.cjs",
     "scripts/verify-offline-modes.mjs",
     "scripts/verify-offline-host.mjs",
+    "scripts/verify-settings.mjs",
+    "scripts/verify-settings-host.mjs",
     "cordis.patch.yml",
     "README.md"
   ]

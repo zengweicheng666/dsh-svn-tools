@@ -118,12 +118,31 @@ check(t.isTransportError('svn: E155007: not a working copy') === false, 'E155007
 check(t.isTransportError('svn: E170001: Authentication failed') === false, 'E170001 is not a transport error');
 
 // ------------------------------------------------------ 2) panel render
-let tab;
-const ctx = {
-  betterSidebar: { registerTab: (x) => { tab = x; return () => {}; } },
+// Minimal stand-in for the cordis client context: `inject` activates a
+// callback for the services this fake provides (and does nothing for the ones
+// it does not), `slots` records registrations, and `effect` owns a disposer.
+let tab = null;
+const slotsRegistered = [];
+const fakeCtx = {
+  betterSidebar: { registerTab: (x) => { tab = x; return () => { tab = null; }; } },
+  slots: {
+    inject(name, callback) {
+      const dispose = callback();
+      return () => { if (typeof dispose === 'function') dispose(); };
+    },
+    register(options, component) {
+      slotsRegistered.push({ options, component });
+      return () => { const i = slotsRegistered.findIndex((r) => r.options === options); if (i >= 0) slotsRegistered.splice(i, 1); };
+    },
+  },
   effect(fn) { return fn(); },
+  inject(deps, callback) {
+    for (const dep of deps) if (this[dep] === undefined) return () => {};
+    const dispose = callback(this);
+    return { dispose: () => { if (typeof dispose === 'function') dispose(); } };
+  },
 };
-mod.apply(ctx);
+mod.apply(fakeCtx);
 if (!tab) {
   console.error("the 'svn' sidebar tab was not registered");
   process.exit(2);
