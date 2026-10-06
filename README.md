@@ -111,6 +111,15 @@ dsh plugin --profile web add file:./plugins/dsh-svn-tools
 - 侧边栏载体按「设置」里选择的来；`auto` 在 DSH 0.1.5+ 上用自带侧边栏，老版本回退 `dsh-better-sidebar`（若已安装）。
 - 本插件的 preinstall 检查**只提示不拦截**：profile 没有 `dsh-better-sidebar` 层时会打印一行说明（DSH 0.1.5+ 自带侧边栏即可），安装照常成功。设 `DSH_SVN_TOOLS_SKIP_SIDEBAR_CHECK=1` 可静默。
 
+### 被 dsh-update-checker 识别（更新提示的前提）
+
+[dsh-update-checker](https://github.com/Airmetro/dsh-update-checker) 对第三方插件走 **npm + GitHub 双源**，两条来源都需要包自己声明：
+
+1. **`repository` 字段**（本包自 0.13.0 起声明 `git+https://github.com/zengweicheng666/dsh-svn-tools.git`）——它只读**已安装副本**的 `package.json` 来推导 GitHub 仓库；没有这个字段时既不查 GitHub，本包又不在 npm 上，于是状态为 `no update source`，**界面不会有任何更新提示**（这不是"已是最新"）。
+2. **GitHub Release**（本仓库用 `v<版本号>` 标签发布）——检查器读的是 `GET /repos/{owner}/{repo}/releases/latest`，**只有 tag、没有 release 一律视为无 GitHub 来源**。
+
+因此：`< 0.13.0` 的旧安装副本因为 manifest 里没有 `repository`，检查器看不见它，**需要手工升级一次**（`dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.13.0`）才能进入自动提示循环；此后每次发版只要「打 `v<版本>` 的 Release + 推送」，面板就会提示并支持一键更新。
+
 ## 前提
 
 - `svn` 命令行客户端在 PATH 中（Windows 上为 `svn.exe`），或在设置里指定 `svnPath`。

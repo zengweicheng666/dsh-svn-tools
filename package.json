@@ -5,6 +5,14 @@
   "type": "module",
   "main": "lib/index.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zengweicheng666/dsh-svn-tools.git"
+  },
+  "homepage": "https://github.com/zengweicheng666/dsh-svn-tools#readme",
+  "bugs": {
+    "url": "https://github.com/zengweicheng666/dsh-svn-tools/issues"
+  },
   "scripts": {
     "preinstall": "node scripts/preinstall.cjs",
     "verify:offline": "node scripts/verify-offline-modes.mjs",
