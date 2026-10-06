@@ -113,8 +113,9 @@ dsh plugin --profile web add file:./plugins/dsh-svn-tools
 
 并确保 `package.json` 的 `dsh.profile.bundles` 中包含 `dsh-svn-tools`。重启 dsh web 后生效。
 
-- 版本兼容：`@deepseek-ai/dsh-tools` 的 peer 范围是 `^0.1.0-rc.6 || ^0.2.0-rc.1`，即同时支持 DSH **0.1.x** 与 **0.2.x**；0.2.0-rc.2 的兼容性由宿主自检脚本在真实 0.2.0-rc.2 运行时上验证（`verify-settings-host` / `verify-offline-host`）。
-- 侧边栏载体按「设置」里选择的来；`auto` 在 DSH 0.1.5+ 上用自带侧边栏，老版本回退 `dsh-better-sidebar`（若已安装）。
+- 版本兼容：`@deepseek-ai/dsh-tools` 的 peer 范围是 **`>=0.1.0-rc.6`** —— 自带侧边栏从这一版起就有，因此声明为「rc.6 及以上全部支持」，不再按大版本切段。门禁（`dsh-app-boot` 的 `evaluatePluginCompatibility`）只用 `semver.satisfies(runtime, range, { includePrerelease: true })` 判 `@deepseek-ai/dsh` / `@deepseek-ai/dsh-*` 两类 peer，预发布参与比较，所以 0.2.x 预发布与更高版本都直接放行。
+- 0.2.x 的兼容性由宿主自检脚本在**真实 0.2.0-rc.2 运行时**（含全部 peer 依赖）上验证：`verify-settings-host` / `verify-offline-host`。
+- 侧边栏载体按「设置」里选择的来；`auto` 在有自带侧边栏的版本上用自带侧边栏，老版本回退 `dsh-better-sidebar`（若已安装）。
 - 本插件的 preinstall 检查**只提示不拦截**：profile 没有 `dsh-better-sidebar` 层时会打印一行说明（DSH 0.1.5+ 自带侧边栏即可），安装照常成功。设 `DSH_SVN_TOOLS_SKIP_SIDEBAR_CHECK=1` 可静默。
 
 ### 被 dsh-update-checker 识别（更新提示的前提）
@@ -124,7 +125,7 @@ dsh plugin --profile web add file:./plugins/dsh-svn-tools
 1. **`repository` 字段**（本包自 0.13.0 起声明 `git+https://github.com/zengweicheng666/dsh-svn-tools.git`）——它只读**已安装副本**的 `package.json` 来推导 GitHub 仓库；没有这个字段时既不查 GitHub，本包又不在 npm 上，于是状态为 `no update source`，**界面不会有任何更新提示**（这不是"已是最新"）。
 2. **GitHub Release**（本仓库用 `v<版本号>` 标签发布）——检查器读的是 `GET /repos/{owner}/{repo}/releases/latest`，**只有 tag、没有 release 一律视为无 GitHub 来源**。
 
-因此：`< 0.13.0` 的旧安装副本因为 manifest 里没有 `repository`，检查器看不见它，**需要手工升级一次**（`dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.13.0`）才能进入自动提示循环；此后每次发版只要「打 `v<版本>` 的 Release + 推送」，面板就会提示并支持一键更新。
+因此：`< 0.13.0` 的旧安装副本因为 manifest 里没有 `repository`，检查器看不见它，**需要手工升级一次**（`dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.13.2`，或当时的最新版）才能进入自动提示循环；此后每次发版只要「打 `v<版本>` 的 Release + 推送」，面板就会提示并支持一键更新。
 
 ## 前提
 
