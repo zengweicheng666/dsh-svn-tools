@@ -80,15 +80,20 @@ SVN (Subversion) 工具 + 侧边栏 UI 插件，为 DeepSeek Harness 提供：
 
 ## 设置（Settings）
 
-**位置：设置 → 插件 → 插件配置 → 「SVN 工具」卡片**（宿主与浏览器两半共同注册的 `dsh-svn-tools` 命名空间）。
+十项配置由插件自己的 `Config`（schemastery）声明；**入口随 DSH 版本不同**，取值都从这份 schema 派生：
 
-- 取值落在 DSH 用户设置文档 `$DSH_HOME/settings.yaml` 的 `dsh-svn-tools:` 段，**改动立即生效、无需重启**；卡片对已覆盖的字段标「已改」，可单项「恢复默认」。
-- 宿主半侧用 `ctx.settings.installSection` 注册，浏览器半侧用 `ctx.settingsScope` 读写；两者都缺（例如无设置 provider 的部署）时插件按内置默认值运行，卡片会明确说明「设置存储不可用」。
+| DSH | 入口 | 落在哪里 | 生效方式 |
+|---|---|---|---|
+| **0.2.x** | 插件管理器里本插件条目自己的配置页（schema 派生表单，按 profile 条目 id 键控） | **profile patch**（条目自身的 `config`） | 写入后由 Loader 重载该条目 |
+| **0.1.x** | 设置 → 插件 → 插件配置 → 「SVN 工具」卡片 | `$DSH_HOME/settings.yaml` 的 `dsh-svn-tools:` 段 | 立即生效、无需重启；已覆盖字段标「已改」、可单项「恢复默认」 |
+
+- 宿主半侧在 0.1.x 用 `ctx.settings.installSection` 注册命名空间，浏览器半侧用 `ctx.settingsScope` 读写；0.2.x 的 `ctx.settings`（`SettingsForms`）没有 `installSection`，插件**检测到就直接以条目 `config` 为准**，不会去注册命名空间。
+- 面板的取值链路对两代都成立：`/svn/api/root` 始终回报解析后的配置，面板据此运行——所以即使没有客户端设置服务，面板也按你的配置工作，只是没有可视化编辑入口。
 
 | 设置 | 默认 | 作用 |
 |---|---|---|
 | `sidebarCarrier` | `auto` | 侧边栏载体：`auto` / `native`（DSH 自带）/ `better-sidebar` / `off` |
-| `svnPath` | 空 | `svn` 可执行文件路径；空 = 用 PATH 上的 `svn`。`svnversion` 会在同目录自动查找，找不到就回退 PATH。卡片有「检测」（`svn --version --quiet`） |
+| `svnPath` | 空 | `svn` 可执行文件路径；空 = 用 PATH 上的 `svn`。`svnversion` 会在同目录自动查找，找不到就回退 PATH。0.1.x 卡片有「检测」（`svn --version --quiet`） |
 | `commandTimeoutScale` | `1` | 命令超时倍数（0.2–20）：乘以每条 svn 命令的默认超时（普通 60s、更新/提交 300s），仓库慢/工作副本大时调 2–3 |
 | `historyPageSize` | `30` | 「历史」分页首屏条数，也是「加载更早的版本」每次追加的条数（5–200） |
 | `historyCacheEnabled` | `true` | 是否把取到的 `svn log` 缓存到工作副本 `.svn/dsh-history-cache.json`（服务器不可达时「历史」仍可用） |
@@ -98,7 +103,7 @@ SVN (Subversion) 工具 + 侧边栏 UI 插件，为 DeepSeek Harness 提供：
 | `showUnversionedDefault` | `true` | 「提交」分页「显示无版本控制的文件」的初始勾选状态（面板里仍可随时切换） |
 | `defaultView` | `commit` | 面板默认分页：`commit` / `history` / `locks` |
 
-手改 `settings.yaml` 时注意：非法取值（拼错的载体名、越界的数字）会被 schema 拒绝——DSH 会保留该命名空间上一个可用值并告警，最坏情况下该命名空间注册失败，此时插件按内置默认值运行。
+非法取值（拼错的载体名、越界的数字）会被 schema 拒绝：0.2.x 的表单不接受该输入；0.1.x 手改 `settings.yaml` 时 DSH 会保留该命名空间上一个可用值并告警，最坏情况下命名空间注册失败，此时插件按内置默认值运行。
 
 ## 安装
 
@@ -108,6 +113,7 @@ dsh plugin --profile web add file:./plugins/dsh-svn-tools
 
 并确保 `package.json` 的 `dsh.profile.bundles` 中包含 `dsh-svn-tools`。重启 dsh web 后生效。
 
+- 版本兼容：`@deepseek-ai/dsh-tools` 的 peer 范围是 `^0.1.0-rc.6 || ^0.2.0-rc.1`，即同时支持 DSH **0.1.x** 与 **0.2.x**；0.2.0-rc.2 的兼容性由宿主自检脚本在真实 0.2.0-rc.2 运行时上验证（`verify-settings-host` / `verify-offline-host`）。
 - 侧边栏载体按「设置」里选择的来；`auto` 在 DSH 0.1.5+ 上用自带侧边栏，老版本回退 `dsh-better-sidebar`（若已安装）。
 - 本插件的 preinstall 检查**只提示不拦截**：profile 没有 `dsh-better-sidebar` 层时会打印一行说明（DSH 0.1.5+ 自带侧边栏即可），安装照常成功。设 `DSH_SVN_TOOLS_SKIP_SIDEBAR_CHECK=1` 可静默。
 

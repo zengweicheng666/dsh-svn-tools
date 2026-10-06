@@ -160,6 +160,40 @@ if (process.argv[2]) {
   console.log('  ..  skipped (no working-copy path given)');
 }
 
+// ------------------------------------------- 5) 0.2.x configuration path
+// DSH 0.2.x replaced the per-plugin settings namespace with a form derived from
+// the plugin's own `Config`, keyed by profile entry id; `ctx.settings` is then
+// `SettingsForms` (describe/update/replace/mutate) and has NO `installSection`.
+// The plugin must take the resolved entry config as its configuration and must
+// not try to register a namespace.
+console.log('0.2.x-style settings service (SettingsForms, no installSection):');
+let registeredOn02x = false;
+apply({
+  tools: { register() {} },
+  webServer: { register() {} },
+  webRuntime: { trustedHosts: [] },
+  sessions: { get: () => ({ header: { cwd: process.cwd() } }) },
+  agents: {},
+  llm: {},
+  effect(fn) { return fn(); },
+  inject(deps, callback) {
+    if (!deps.includes('settings')) return { dispose() {} };
+    callback({
+      settings: {
+        describe: () => [],
+        update: async () => {},
+        replace: async () => {},
+        mutate: async () => {},
+      },
+    });
+    return { dispose() {} };
+  },
+}, { historyPageSize: 77, sidebarCarrier: 'native' });
+check(__test.svnSettings().historyPageSize === 77, 'the resolved entry config is the configuration source');
+check(__test.svnSettings().sidebarCarrier === 'native', 'the carrier comes from the entry config too');
+check(__test.svnSettings().svnPath === SETTINGS_DEFAULTS.svnPath, 'fields the entry config omits keep their defaults');
+check(registeredOn02x === false, 'no namespace registration is attempted without installSection');
+
 if (failures > 0) {
   console.error(`\n${failures} check(s) FAILED`);
   process.exit(1);
