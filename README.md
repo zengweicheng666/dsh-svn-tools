@@ -4,7 +4,7 @@
 >
 > | `sidebarCarrier` | 含义 |
 > |---|---|
-> | `auto`（默认） | 有 DSH 自带侧边栏（**0.1.5+**）就用它；否则回退到 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) |
+> | `auto`（默认） | 有 DSH 自带侧边栏（**0.1.0-rc.6+**）就用它；否则回退到 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) |
 > | `native` | 只用 DSH 自带侧边栏（右侧栏的「SVN」分页，出现在向导里） |
 > | `better-sidebar` | 只用 dsh-better-sidebar 插件的「SVN」分页（老版本 DSH 的选择） |
 > | `off` | 不注册任何侧边栏面板，只用 33 个 `svn_*` agent 工具 |
@@ -37,7 +37,7 @@ SVN (Subversion) 工具 + 侧边栏 UI 插件，为 DeepSeek Harness 提供：
 
 同一套面板渲染在两个载体里，行为完全一致：
 
-- **DSH 自带侧边栏**（0.1.5+，默认）：面板是右侧栏的一个分页类型（`kind: svn`），并注册向导入口（`向导` 里的「SVN」胶囊）；点击胶囊或从向导进入即打开面板。面板内容随会话切换，标签文字固定为 `SVN`。
+- **DSH 自带侧边栏**（0.1.0-rc.6+，默认）：面板是右侧栏的一个分页类型（`kind: svn`），并注册向导入口（`向导` 里的「SVN」胶囊）；点击胶囊或从向导进入即打开面板。面板内容随会话切换，标签文字固定为 `SVN`。
 - **dsh-better-sidebar**：注册为它的 `svn` 分页（老版本 DSH 或习惯该侧边栏时选择）。
 - 切换载体**立即生效**（当前已打开的 SVN 分页会关闭；重新打开即可）。
 
@@ -115,8 +115,9 @@ dsh plugin --profile web add file:./plugins/dsh-svn-tools
 
 - 版本兼容：`@deepseek-ai/dsh-tools` 的 peer 范围是 **`>=0.1.0-rc.6`** —— 自带侧边栏从这一版起就有，因此声明为「rc.6 及以上全部支持」，不再按大版本切段。门禁（`dsh-app-boot` 的 `evaluatePluginCompatibility`）只用 `semver.satisfies(runtime, range, { includePrerelease: true })` 判 `@deepseek-ai/dsh` / `@deepseek-ai/dsh-*` 两类 peer，预发布参与比较，所以 0.2.x 预发布与更高版本都直接放行。
 - 0.2.x 的兼容性由宿主自检脚本在**真实 0.2.0-rc.2 运行时**（含全部 peer 依赖）上验证：`verify-settings-host` / `verify-offline-host`。
-- 侧边栏载体按「设置」里选择的来；`auto` 在有自带侧边栏的版本上用自带侧边栏，老版本回退 `dsh-better-sidebar`（若已安装）。
-- 本插件的 preinstall 检查**只提示不拦截**：profile 没有 `dsh-better-sidebar` 层时会打印一行说明（DSH 0.1.5+ 自带侧边栏即可），安装照常成功。设 `DSH_SVN_TOOLS_SKIP_SIDEBAR_CHECK=1` 可静默。
+- 侧边栏载体按「设置」里选择的来；`auto` 在有自带侧边栏的版本上用自带侧边栏，老版本回退 `dsh-better-sidebar`（若已安装）。载体在**面板挂载之前**就已按宿主解析出的设置确定，所以 0.2.x 上选 `off`/`better-sidebar` 也不会先闪出一个自带侧边栏分页。
+- **本插件没有安装期脚本**（0.13.3 起移除了 `preinstall`）：安装不会触发 pnpm 的依赖脚本授权，也不需要往 `pnpm-workspace.yaml` 的 `allowBuilds`/`onlyBuiltDependencies` 里加条目 —— 市场目录里原先那条 `runs code at install time (preinstall)` 红线随之消失。
+- 加固（0.13.3）：仓库 URL 不再被当作文件路径解析；`svnPath` 与「命令超时倍数」对全部命令生效；只读模式把 `export` 也当作写操作；`propget/propset/propdel/changelist/mergeinfo/checkout/switch/merge/relocate` 的位置参数拒绝以 `-` 开头（避免被 svn 当成 `--config-dir` 之类选项）；`repoRel` 越界（`..`/盘符）被拒绝；提交前 `svn delete` 失败会如实上报而不是算作已删除。回归脚本：`npm run verify:hardening`。
 
 ### 被 dsh-update-checker 识别（更新提示的前提）
 
@@ -125,11 +126,15 @@ dsh plugin --profile web add file:./plugins/dsh-svn-tools
 1. **`repository` 字段**（本包自 0.13.0 起声明 `git+https://github.com/zengweicheng666/dsh-svn-tools.git`）——它只读**已安装副本**的 `package.json` 来推导 GitHub 仓库；没有这个字段时既不查 GitHub，本包又不在 npm 上，于是状态为 `no update source`，**界面不会有任何更新提示**（这不是"已是最新"）。
 2. **GitHub Release**（本仓库用 `v<版本号>` 标签发布）——检查器读的是 `GET /repos/{owner}/{repo}/releases/latest`，**只有 tag、没有 release 一律视为无 GitHub 来源**。
 
-因此：`< 0.13.0` 的旧安装副本因为 manifest 里没有 `repository`，检查器看不见它，**需要手工升级一次**（`dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.13.2`，或当时的最新版）才能进入自动提示循环；此后每次发版只要「打 `v<版本>` 的 Release + 推送」，面板就会提示并支持一键更新。
+因此：`< 0.13.0` 的旧安装副本因为 manifest 里没有 `repository`，检查器看不见它，**需要手工升级一次**才能进入自动提示循环；此后每次发版只要「打 `v<版本>` 的 Release + 推送」，面板就会提示并支持一键更新。
+
+> **安装形态决定谁能提示更新。** 用**裸仓库**安装（`github:zengweicheng666/dsh-svn-tools`）时两条通道都活：dsh-update-checker 按版本比较（读 Release），市场按默认分支 HEAD 比较。一旦装成**带 ref 的 spec**（`#v0.13.2` 标签或 `#<commit>`），市场只会拿那个 ref 去比较，于是**永远报「已是最新」**——这不是故障，是 pin 的语义（可复现安装优先）。所以：
+> - 想跟着版本走：装裸仓库 spec，或直接从市场条目安装；
+> - 已经 pin 了：用 dsh-update-checker 的更新提示（它会写回新的 tag pin），或重装一次裸仓库 spec 解除 pin。
 
 ## 前提
 
 - `svn` 命令行客户端在 PATH 中（Windows 上为 `svn.exe`），或在设置里指定 `svnPath`。
-- 侧边栏面板：DSH 0.1.5+ 自带侧边栏，或 `dsh-better-sidebar` 插件；两者都没有时面板不注册，agent 工具不受影响。
+- 侧边栏面板：DSH 0.1.0-rc.6+ 自带侧边栏，或 `dsh-better-sidebar` 插件；两者都没有时面板不注册，agent 工具不受影响。
 - 输出解码：优先 UTF-8，失败回退 GBK（中文 Windows 控制台）。
 - 设置存储：需要宿主挂载设置 provider（官方 profile 的 `@deepseek-ai/dsh-settings-file` → `$DSH_HOME/settings.yaml`）；未挂载时按默认值运行。

@@ -1,7 +1,7 @@
 {
   "name": "dsh-svn-tools",
   "description": "SVN (Subversion) tools + sidebar UI for DeepSeek Harness: 33 svn_* agent tools with full command coverage (status/info/diff/log/blame/list/cat/add/delete/mkdir/copy/move/merge/switch/checkout/cleanup/resolve/props/commit...) and UTF-8 Chinese commit logs, plus an SVN panel that renders in DSH's built-in right Sidebar (0.1.0-rc.6+) or dsh-better-sidebar — carrier and 9 more options are configurable in Settings; works on DSH 0.1.x and 0.2.x.",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "type": "module",
   "main": "lib/index.js",
   "license": "MIT",
@@ -14,7 +14,7 @@
     "url": "https://github.com/zengweicheng666/dsh-svn-tools/issues"
   },
   "scripts": {
-    "preinstall": "node scripts/preinstall.cjs",
+    "verify:hardening": "node scripts/verify-hardening.mjs",
     "verify:offline": "node scripts/verify-offline-modes.mjs",
     "verify:offline:host": "node scripts/verify-offline-host.mjs",
     "verify:settings": "node scripts/verify-settings.mjs",
@@ -49,6 +49,9 @@
     "@deepseek-ai/schemastery": "^3.18.2",
     "dsh-better-sidebar": ">=0.18.0"
   },
+  "engines": {
+    "dsh": ">=0.1.0-rc.6"
+  },
   "peerDependenciesMeta": {
     "@deepseek-ai/schemastery": {
       "optional": true
@@ -65,7 +68,7 @@
   },
   "files": [
     "lib",
-    "scripts/preinstall.cjs",
+    "scripts/verify-hardening.mjs",
     "scripts/verify-offline-modes.mjs",
     "scripts/verify-offline-host.mjs",
     "scripts/verify-settings.mjs",

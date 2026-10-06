@@ -113,8 +113,29 @@ if (conn.reachable === false) {
 console.log('read-only enforcement:');
 const roWrite = await callFails('add', { sessionId: 'verify', readOnly: true, paths: ['definitely-missing-file.txt'] });
 check(roWrite.failed && /只读模式/.test(roWrite.message), 'write methods are refused with readOnly', roWrite.message);
+// `export` writes a copy of the tree to a caller-named directory, so the 只读
+// fence must refuse it too (it was missing from WRITE_API_METHODS before).
+const roExport = await callFails('export', { sessionId: 'verify', readOnly: true, target: '.', path: 'definitely-not-created' });
+check(roExport.failed && /只读模式/.test(roExport.message), 'export is refused in read-only mode too', roExport.message);
 const roRead = await callFails('status', { sessionId: 'verify', readOnly: true });
 check(!roRead.failed, 'read methods still work with readOnly', roRead.message);
+
+// ------------------------------------------- 3b) repoRel containment (traversal)
+console.log('repo-relative paths cannot escape the working copy:');
+const rootInfo = await call('root', { sessionId: 'verify' });
+const suffix = String(rootInfo.url || '').slice(String(rootInfo.repositoryRoot || '').length).replace(/\/+$/, '');
+if (suffix !== '' && suffix.startsWith('/')) {
+  const crafted = `${suffix}/../../dsh-svn-tools-traversal-probe`;
+  const escaped = await callFails('diff-sides-rev', { sessionId: 'verify', repoRel: crafted, revision: 1 });
+  check(escaped.failed && /路径不合法|不在当前工作副本/.test(escaped.message),
+    'a repoRel containing ".." is refused', escaped.message);
+  const absolute = `${suffix}/C:/Windows/win.ini`;
+  const escapedAbs = await callFails('diff-sides-rev', { sessionId: 'verify', repoRel: absolute, revision: 1 });
+  check(escapedAbs.failed && /路径不合法|不在当前工作副本/.test(escapedAbs.message),
+    'an absolute-looking repoRel never escapes', escapedAbs.message);
+} else {
+  console.log('  ..  skipped (working copy IS the repository root — suffix empty)');
+}
 
 // ------------------------------------------------- 4) offline history diff
 console.log('offline history diff (pristine store):');

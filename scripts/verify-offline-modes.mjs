@@ -111,6 +111,32 @@ check(t.blockMethod('offline', 'diff') === undefined, 'offline allows diff (loca
 check(t.blockMethod('offline', 'log') === undefined, 'offline allows the cached history');
 check(t.blockMethod('offline', 'history-prev-revs') === undefined, 'offline allows prev-rev labels');
 check(t.blockMethod('offline', 'locks') === undefined, 'offline allows local locks');
+console.log('write classification stays in sync with the host:');
+// `export` writes a copy of the tree to a caller-named directory and
+// propset/propdel change versioned properties: all three must be treated as
+// writes (the host's WRITE_API_METHODS carries the same three).
+check(/只读模式/.test(t.blockMethod('read-only', 'export')), 'read-only blocks export');
+check(/只读模式/.test(t.blockMethod('read-only', 'propset')), 'read-only blocks propset');
+check(/只读模式/.test(t.blockMethod('read-only', 'propdel')), 'read-only blocks propdel');
+check(/离线模式/.test(t.blockMethod('offline', 'export')), 'offline blocks export');
+check(t.WRITE_METHODS.export === 1 && t.WRITE_METHODS.propset === 1 && t.WRITE_METHODS.propdel === 1,
+  'WRITE_METHODS carries export/propset/propdel');
+console.log('transport-error retry never replays a write:');
+check(t.shouldRetryLocally('status') === true, 'reads may be replayed against local data');
+check(t.shouldRetryLocally('log') === true, 'the cached history may be replayed');
+check(t.shouldRetryLocally('diff') === true, 'the local BASE↔WC diff may be replayed');
+for (const write of ['commit', 'update-start', 'update', 'export', 'propset', 'propdel', 'revert', 'history-revert']) {
+  check(t.shouldRetryLocally(write) === false, `a failed ${write} is never replayed (no double execution)`);
+}
+console.log('"not a working copy" detection (checkout-form gate):');
+check(t.isNotAWorkingCopy('svn: E155007: Not a working copy') === true, 'E155007 opens the checkout form');
+check(t.isNotAWorkingCopy("svn status failed: svn: E155007: 'D:\\x' is not a working copy") === true, 'the English wording is recognised');
+check(t.isNotAWorkingCopy('svn: E155007: 不是工作副本') === true, 'the localized wording is recognised');
+// The three E155004/E155036 cases below used to be swallowed by a bare
+// /working copy/ test, hiding the real error behind the checkout form.
+check(t.isNotAWorkingCopy("svn: E155004: Working copy 'D:\\x' locked") === false, 'E155004 (locked) surfaces its real error');
+check(t.isNotAWorkingCopy("svn: E155036: Working copy 'D:\\x' is an old format") === false, 'E155036 (old format) surfaces its real error');
+check(t.isNotAWorkingCopy('svn: E170013: Unable to connect to a repository') === false, 'a transport error is not a checkout case');
 console.log('transport-error classification:');
 check(t.isTransportError('svn log failed: svn: E170013: Unable to connect to a repository at URL') === true, 'E170013 is a transport error');
 check(t.isTransportError('svn: E210005: No repository found in') === true, 'E210005 falls back to local data too');
@@ -143,6 +169,12 @@ const fakeCtx = {
   },
 };
 mod.apply(fakeCtx);
+// The carrier now waits for the host's resolved settings before mounting (so a
+// configured `off` never flashes a tab), so let that first fetch settle. This
+// fake ctx has no host to answer, hence the stub.
+globalThis.fetch = async () => ({ ok: false, status: 404, json: async () => ({ ok: false, error: { message: 'HTTP 404' } }) });
+await new Promise((resolve) => setTimeout(resolve, 0));
+delete globalThis.fetch;
 if (!tab) {
   console.error("the 'svn' sidebar tab was not registered");
   process.exit(2);

@@ -239,10 +239,29 @@ function makeHost() {
   return { host, record };
 }
 
+// The client asks the host for the resolved settings as soon as it is applied
+// (see section 3b), so the carrier mounts one microtask later. Stub that call:
+// `hostCarrier` is what the host would report as the resolved sidebarCarrier.
+const fetchCalls = [];
+let hostCarrier = 'auto';
+globalThis.fetch = async (url) => {
+  fetchCalls.push(String(url));
+  if (String(url).endsWith('/svn/api/settings')) {
+    return {
+      ok: true,
+      json: async () => ({ ok: true, value: { settings: { sidebarCarrier: hostCarrier }, settingsUser: { sidebarCarrier: hostCarrier } } }),
+    };
+  }
+  return { ok: false, status: 404, json: async () => ({ ok: false, error: { message: 'HTTP 404' } }) };
+};
+/** Let the apply-time settings fetch settle before asserting carrier state. */
+const settleCarrier = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 const switchScope = makeFakeScope({});
 const { host, record } = makeHost();
 host.settingsScope = switchScope.binder;
 mod.apply(host);
+await settleCarrier();
 check(record.types.length === 1 && record.types[0].kind === 'svn', 'the built-in sidebar gets the svn tab type');
 check(record.types[0].id === 'dsh-svn-tools', 'the tab type is identified by the package id');
 check(typeof record.types[0].title() === 'string' && record.types[0].title().includes('SVN'), 'the tab chip is named SVN');
@@ -261,6 +280,35 @@ check(record.betterTabs.length === 1 && record.betterTabs[0].id === 'svn', 'swit
 // And off: the panel disappears entirely, the agent tools are untouched.
 await switchScope.scope.set('sidebarCarrier', 'off');
 check(record.disposed.includes('better:svn'), 'off disposes the better-sidebar tab');
+
+// ------------------------------- 3b) host settings reach the client first
+// The carrier is decided BEFORE the panel can mount (and DSH 0.2.x has no
+// settings scope at all), so apply() must ask the host up front: without this
+// the carrier only followed the setting after the panel had been opened once,
+// which also meant `off` registered the native tab first.
+console.log('host settings before first paint:');
+hostCarrier = 'off';
+const offHost = makeHost();
+mod.apply(offHost.host);
+check(offHost.record.types.length === 0,
+  'nothing is mounted while the carrier setting is still unknown (no flash of the wrong carrier)',
+  `registered ${offHost.record.types.length} native type(s) before the host answered`);
+await settleCarrier();
+check(fetchCalls.some((u) => u.endsWith('/svn/api/settings')),
+  'apply() asks the host for the resolved settings (a plain relative fetch)', fetchCalls.join(','));
+check(offHost.record.types.length === 0,
+  'a host-side sidebarCarrier: off is honoured before the panel is ever opened',
+  `registered ${offHost.record.types.length} native type(s)`);
+check(offHost.record.cards.length === 0, 'the settings card is 0.1.x-only and stays unmounted here');
+// The other direction: the same hydration path must select the native carrier
+// (and the previous apply must not have leaked its state into this one).
+hostCarrier = 'auto';
+const nativeHost = makeHost();
+mod.apply(nativeHost.host);
+await settleCarrier();
+check(nativeHost.record.types.length === 1 && nativeHost.record.types[0].kind === 'svn',
+  'a host-side auto mounts the built-in sidebar with no settings scope present');
+check(offHost.record.types.length === 0, 'the previous instance stayed untouched');
 
 // ------------------------------------------------------- 4) settings card
 console.log('settings card render:');
