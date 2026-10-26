@@ -117,7 +117,7 @@ One panel renders in either carrier with **identical behaviour**; switching take
 ### History
 
 - **List**: the newest N entries (N = `historyPageSize`, default 30); **Load older revisions** appends the same page size until r1, after which the button reads "all N revisions shown".
-- **Detail**: click a revision for a split view (list above, that revision's message and changed paths below) with a draggable divider; hover **Compare** or double-click a path for a **read-only** side-by-side diff against the previous revision (same compare view; non-ASCII paths are read through percent-encoded repository URLs).
+- **Detail**: click a revision for a split view (list above, that revision's message and changed paths below) with a draggable divider; each file row's `Compare / Undo rN / Revert to rX / Back to this revision` group is pinned to the right edge and floats above the path (it stays fully visible and clickable however long the path or narrow the panel, while the path itself still scrolls horizontally); hover **Compare** or double-click a path for a **read-only** side-by-side diff against the previous revision (same compare view; non-ASCII paths are read through percent-encoded repository URLs).
 - **File list**: checkboxes are always visible (always multi-select); interaction matches the Changes list (row click, marquee, group sync).
 - **Row and batch actions** (working copy only — **never committed for you**; the files reappear as `M/A/D` on the Commit page for you to decide):
 
