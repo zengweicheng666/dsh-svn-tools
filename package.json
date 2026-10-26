@@ -1,7 +1,7 @@
 {
   "name": "dsh-svn-tools",
   "description": "SVN (Subversion) tools + sidebar UI for DeepSeek Harness: 33 svn_* agent tools with full command coverage (status/info/diff/log/blame/list/cat/add/delete/mkdir/copy/move/merge/switch/checkout/cleanup/resolve/props/commit...) and UTF-8 Chinese commit logs, plus an SVN panel that renders in DSH's built-in right Sidebar (0.1.0-rc.6+) or dsh-better-sidebar — carrier and 9 more options are configurable in Settings; works on DSH 0.1.x and 0.2.x.",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "type": "module",
   "main": "lib/index.js",
   "license": "MIT",

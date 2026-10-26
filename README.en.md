@@ -59,7 +59,7 @@ Install from the [DSH plugin market](https://awesome-dsh-plugin.com/p/zengweiche
 dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools
 
 # Pin a version (reproducible install; see "Updates and install form" for the trade-off)
-dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.16.0
+dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.16.1
 
 # Local source checkout
 dsh plugin --profile web add file:./plugins/dsh-svn-tools
@@ -242,7 +242,7 @@ Invalid values (a misspelled carrier, an out-of-range number) are rejected by th
 
 - The checker needs two things: a **`repository` field** in the installed copy's `package.json` (declared since 0.13.0) and a **GitHub Release** in the repository (published as `v<version>` here).
   It compares **version numbers**, so tag- and commit-pinned installs are notified too.
-- The market compares **ref / commit identity**: a bare repository spec follows the default branch, while a spec with a ref (`#v0.16.0` or `#<commit>`) makes the market report "up to date" for that ref **forever** — that is what pinning means (reproducibility first), not a bug.
+- The market compares **ref / commit identity**: a bare repository spec follows the default branch, while a spec with a ref (`#v0.16.1` or `#<commit>`) makes the market report "up to date" for that ref **forever** — that is what pinning means (reproducibility first), not a bug.
 
 | Your goal | Do this |
 |---|---|

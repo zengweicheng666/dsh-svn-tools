@@ -60,7 +60,7 @@
 dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools
 
 # 锁定某个版本（可复现安装；代价见「更新与安装形态」）
-dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.16.0
+dsh plugin --profile web add github:zengweicheng666/dsh-svn-tools#v0.16.1
 
 # 本地源码开发
 dsh plugin --profile web add file:./plugins/dsh-svn-tools
@@ -252,7 +252,7 @@ SVN 不在工作副本保存提交日志文本，因此这些条目明确显示�
 
 - 检查器需要两件事：已安装副本的 `package.json` 有 **`repository` 字段**（本包自 0.13.0 起声明），以及仓库有 **GitHub Release**（本仓库按 `v<版本>` 发布）。
   它按**版本号**比较，所以 tag/commit pin 的安装同样能收到提示。
-- 插件市场按 **ref / commit 身份**比较：裸仓库 spec 会跟随默认分支；一旦装成带 ref 的 spec（`#v0.16.0` 或 `#<commit>`），**市场对那个 ref 永远报「已是最新」**——这是 pin 的语义（可复现安装优先），不是故障。
+- 插件市场按 **ref / commit 身份**比较：裸仓库 spec 会跟随默认分支；一旦装成带 ref 的 spec（`#v0.16.1` 或 `#<commit>`），**市场对那个 ref 永远报「已是最新」**——这是 pin 的语义（可复现安装优先），不是故障。
 
 因此：
 
