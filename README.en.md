@@ -159,7 +159,7 @@ The panel's default root is the **current project directory**: a session opened 
 - **A commit only covers the selected directory**: a cross-working-copy or out-of-scope selection is refused with the file names instead of committing the wrong tree; `commit-all` is scoped too. A nested checkout is neither listed as an unversioned change of its parent nor auto-`svn add`ed.
 - The list is persisted **per session workspace** (`%LOCALAPPDATA%\dsh-svn-tools\watched\<hash>.json`), so switching sessions does not lose it; at least one directory is always kept. Adding a directory that overlaps an existing one warns that the same change will appear in two groups.
 
-> No built-in directory browser yet: adding a directory takes an absolute path (the placeholder is a generic example, never a real path). `verify:multi-wc` covers the default root, a project-subdirectory scope, routing, persistence and the cross-scope refusal with two independent repositories.
+> **Built-in directory browser**: the "Browse…" button next to "+ directory" walks the file system inside the panel — a subdirectory list with "checkout root" / "inside a checkout" badges, "Up", and "Use this directory" which fills the path back into the input ("Add" still starts following it). No OS dialog is involved, and it keeps working offline and in read-only mode. `verify:multi-wc` covers the default root, a project-subdirectory scope, routing, persistence and the cross-scope refusal with two independent repositories; `verify:list-dir` / `verify:dir-browser` cover the listing endpoint and the panel picker.
 
 ---
 
@@ -270,6 +270,8 @@ npm run verify:readme         # pure Node: both READMEs' anchors/switcher/Licens
 npm run verify:theme          # pure Node: theme-variable scope and fallbacks, no colour literals, sidebar icon colours
 npm run verify:tools          # pure Node + svn/svnadmin: all 33 tools' output survives the lossless-JSON snapshot
 npm run verify:multi-wc       # pure Node + svn/svnadmin: multi/nested working copies — aggregation, write routing, persistence, cross-checkout refusal
+npm run verify:list-dir       # pure Node (+ svn for the badge cases): api.list-dir shape, 400 cases, 500-entry cap, .svn detection, links not followed
+npm run verify:dir-browser    # pure Node: the built-in browser's three states, badges, Up, truncation note and callbacks
 npm run verify:settings:host  # needs a real working copy: namespace and defaults, invalid-value rejection, svnPath/timeout in effect
 npm run verify:offline:host   # needs a real working copy: local history and paging, connection classification, read-only refusal, offline restore safety
 ```

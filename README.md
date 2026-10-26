@@ -160,7 +160,7 @@ SVN 不在工作副本保存提交日志文本，因此这些条目明确显示�
 - **提交只覆盖当前目录**：跨工作副本或超出当前目录的勾选会被明确拒绝并点名文件，不会半提交；`commit-all` 也只提交当前目录。父目录里的嵌套副本不会被当成「未版本化变更」，也不会被自动 `svn add`。
 - 关注列表按**会话工作区**持久化（`%LOCALAPPDATA%\dsh-svn-tools\watched\<哈希>.json`），切换会话不丢；始终至少保留一个目录。添加与已有目录重叠的范围会提示「同一变更会出现在两个分组里」。
 
-> 暂未内置目录浏览器：添加目录需要填绝对路径（占位符是通用示例，不预填真实路径）。`verify:multi-wc` 用两个独立版本库覆盖默认根、项目子目录作用域、路由、持久化与跨目录拒绝。
+> **内置目录浏览器**：「+ 目录」旁的「浏览…」直接在面板里逐级选目录——子目录列表、`检出根` / `检出内` 徽章、`上一级`、`选择此目录` 回填路径（回填后仍要点「添加」）；不经过系统对话框，离线/只读模式下也可用。`verify:multi-wc` 用两个独立版本库覆盖默认根、项目子目录作用域、路由、持久化与跨目录拒绝，`verify:list-dir` / `verify:dir-browser` 覆盖浏览接口与界面。
 
 ---
 
@@ -286,6 +286,8 @@ npm run verify:readme         # 纯 Node：中英 README 的锚点/切换入口/
 npm run verify:theme          # 纯 Node：主题变量作用域与兜底、无颜色字面量、页签图标取色
 npm run verify:tools          # 纯 Node + svn/svnadmin：33 个工具输出通过无损 JSON 快照
 npm run verify:multi-wc       # 纯 Node + svn/svnadmin：多/嵌套工作副本聚合、写路由、持久化、跨副本拒绝
+npm run verify:list-dir       # 纯 Node（有 svn 更能覆盖徽章）：api.list-dir 的形状、400 用例、500 截断、.svn 判定、链接不跟随
+npm run verify:dir-browser    # 纯 Node：内置目录浏览器的三态、徽章、上一级、截断文案与回调
 npm run verify:settings:host  # 需要真实工作副本：命名空间与默认值、非法值拒绝、svnPath/超时生效
 npm run verify:offline:host   # 需要真实工作副本：本地历史与分页、连接分类、只读拒绝、离线回退不误删
 ```

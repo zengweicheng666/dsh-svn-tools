@@ -22,7 +22,9 @@
     "verify:settings:host": "node scripts/verify-settings-host.mjs",
     "verify:theme": "node scripts/verify-theme.mjs",
     "verify:tools": "node scripts/verify-tool-output.mjs",
-    "verify:multi-wc": "node scripts/verify-multi-wc.mjs"
+    "verify:multi-wc": "node scripts/verify-multi-wc.mjs",
+    "verify:list-dir": "node scripts/verify-list-dir.mjs",
+    "verify:dir-browser": "node scripts/verify-dir-browser.mjs"
   },
   "keywords": [
     "deepseek",
@@ -81,6 +83,8 @@
     "scripts/verify-theme.mjs",
     "scripts/verify-tool-output.mjs",
     "scripts/verify-multi-wc.mjs",
+    "scripts/verify-list-dir.mjs",
+    "scripts/verify-dir-browser.mjs",
     "cordis.patch.yml",
     "README.md",
     "README.en.md",
